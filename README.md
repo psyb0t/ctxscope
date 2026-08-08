@@ -56,7 +56,7 @@ slog.InfoContext(ctx, "order placed", "order_id", id)
 
 This is the one nobody can forget, and the only one that reaches code which has never heard of this package — a library logging through `slog.InfoContext` gets your `request_id` for free.
 
-**Use the `Context`-suffixed calls.** `slog.Info` hands the handler a background context, which has no scope on it. That's slog's contract, not ours.
+**Use the `Context`-suffixed calls.** `slog.Info` hands the handler a background context, so the line still gets the global tier — that never came from a context anyway — but none of the per-context tier. Your `service` shows up, your `request_id` doesn't. That's slog's contract, not ours.
 
 ### GetLogger
 

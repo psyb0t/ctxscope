@@ -24,8 +24,9 @@ import (
 // install nothing and go through GetLogger — one or the other, per project.
 //
 // Only the Context-suffixed calls (InfoContext, ErrorContext, ...) carry a
-// context to the handler; plain slog.Info hands it a background context, which
-// has no scope on it. That is slog's contract, not this package's choice.
+// context to the handler. Plain slog.Info hands it a background context, so the
+// line still gets the global tier — which never came from a context — but none
+// of the per-context tier. That is slog's contract, not this package's choice.
 type Handler struct {
 	root slog.Handler
 

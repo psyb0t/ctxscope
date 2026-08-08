@@ -43,17 +43,45 @@ func TestHandler_AppliesContextScope(t *testing.T) {
 	assert.Equal(t, "abc", read()["request_id"])
 }
 
-func TestHandler_PlainCallCarriesNoScope(t *testing.T) {
-	t.Parallel()
+// A plain call loses the per-context tier but NOT the global one, which never
+// came from a context to begin with. Asserting both halves — an earlier version
+// of this test only checked the absence and let the docs overclaim.
+func TestHandler_PlainCallKeepsGlobalTierOnly(t *testing.T) {
+	// NOT parallel: SetGlobal is process-wide state.
+	SetGlobal(Attr("service", "svc"))
+	t.Cleanup(func() {
+		RemoveGlobal("service")
+	})
 
 	logger, read := newTestHandler(t)
 
-	// slog.Logger.Info hands the handler a background context, so a scope on
-	// some other context cannot reach it. This documents that the
-	// Context-suffixed calls are the ones that work.
 	logger.Info("hello")
 
-	assert.NotContains(t, read(), "request_id")
+	record := read()
+	assert.NotContains(t, record, "request_id")
+	assert.Equal(t, "svc", record["service"])
+}
+
+// The README tells people to install the handler with slog.SetDefault and then
+// use the package-level slog calls. That is a different path from driving a
+// logger built here, and nothing covered it.
+func TestHandler_PackageLevelSlogAfterSetDefault(t *testing.T) {
+	// NOT parallel: swaps the process-wide default logger.
+	buf := &bytes.Buffer{}
+
+	previous := slog.Default()
+	t.Cleanup(func() {
+		slog.SetDefault(previous)
+	})
+
+	slog.SetDefault(slog.New(NewHandler(slog.NewJSONHandler(buf, nil))))
+
+	ctx := Set(context.Background(), Attr("request_id", "abc"))
+	slog.InfoContext(ctx, "hello")
+
+	record := map[string]any{}
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &record))
+	assert.Equal(t, "abc", record["request_id"])
 }
 
 func TestHandler_EmptyScopeAddsNothing(t *testing.T) {

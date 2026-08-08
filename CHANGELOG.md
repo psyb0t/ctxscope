@@ -2,6 +2,23 @@
 
 All notable changes per release. Versions follow [semver](https://semver.org).
 
+## v1.0.1 — 2026-08-08
+
+Documentation correction and the test coverage that would have caught it. No
+behaviour changed.
+
+- **Corrected:** the README and `NewHandler`'s doc comment said a plain
+  `slog.Info` call "hands the handler a background context, which has no scope
+  on it". Only the per-context tier is missing — the global tier set by
+  `SetGlobal` never came from a context, so it still lands on the line. The old
+  wording implied a plain call was unattributed, which it is not.
+- Added a test asserting both halves of that (`request_id` absent, `service`
+  present). The previous test only asserted the absence, which let the
+  documentation overclaim without failing anything.
+- Added a test for the `slog.SetDefault` + package-level `slog.InfoContext`
+  path the README recommends. Every existing handler test drove a logger
+  constructed in the test, so the documented setup itself had no coverage.
+
 ## v1.0.0 — 2026-08-08
 
 First release. This package was `github.com/psyb0t/common-go/scope`; it now
