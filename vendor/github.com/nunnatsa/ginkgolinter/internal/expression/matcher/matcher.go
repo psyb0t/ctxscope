@@ -29,24 +29,21 @@ const ( // gomega matchers
 )
 
 type Matcher struct {
-	funcName      string
-	Orig          *ast.CallExpr
-	Clone         *ast.CallExpr
-	info          Info
-	reverseLogic  bool
-	handler       *gomegahandler.Handler
-	hasNotMatcher bool // true if the matcher is wrapped with a "Not" matcher
+	funcName     string
+	Orig         *ast.CallExpr
+	Clone        *ast.CallExpr
+	info         Info
+	reverseLogic bool
+	handler      gomegahandler.Handler
 }
 
-func New(origMatcher, matcherClone *ast.CallExpr, pass *analysis.Pass, handler *gomegahandler.Handler) *Matcher {
+func New(origMatcher, matcherClone *ast.CallExpr, pass *analysis.Pass, handler gomegahandler.Handler) (*Matcher, bool) {
 	reverse := false
-	hasNotMatcher := false
-
 	var assertFuncName string
 	for {
-		info := handler.GetGomegaBasicInfo(origMatcher)
-		if info == nil {
-			return nil
+		info, ok := handler.GetGomegaBasicInfo(origMatcher)
+		if !ok {
+			return nil, false
 		}
 
 		if info.MethodName != "Not" {
@@ -54,33 +51,26 @@ func New(origMatcher, matcherClone *ast.CallExpr, pass *analysis.Pass, handler *
 			break
 		}
 
-		hasNotMatcher = true
 		reverse = !reverse
-		var ok bool
 		origMatcher, ok = origMatcher.Args[0].(*ast.CallExpr)
 		if !ok {
-			return nil
+			return nil, false
 		}
 		matcherClone = matcherClone.Args[0].(*ast.CallExpr)
 	}
 
 	return &Matcher{
-		funcName:      assertFuncName,
-		Orig:          origMatcher,
-		Clone:         matcherClone,
-		info:          getMatcherInfo(origMatcher, matcherClone, assertFuncName, pass, handler),
-		reverseLogic:  reverse,
-		hasNotMatcher: hasNotMatcher,
-		handler:       handler,
-	}
+		funcName:     assertFuncName,
+		Orig:         origMatcher,
+		Clone:        matcherClone,
+		info:         getMatcherInfo(origMatcher, matcherClone, assertFuncName, pass, handler),
+		reverseLogic: reverse,
+		handler:      handler,
+	}, true
 }
 
 func (m *Matcher) ShouldReverseLogic() bool {
 	return m.reverseLogic
-}
-
-func (m *Matcher) HasNotMatcher() bool {
-	return m.hasNotMatcher
 }
 
 func (m *Matcher) GetMatcherInfo() Info {

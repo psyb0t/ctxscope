@@ -319,10 +319,10 @@ func (subst *subster) interface_(iface *types.Interface) *types.Interface {
 
 func (subst *subster) alias(t *types.Alias) types.Type {
 	// See subster.named. This follows the same strategy.
-	tparams := t.TypeParams()
-	targs := t.TypeArgs()
+	tparams := aliases.TypeParams(t)
+	targs := aliases.TypeArgs(t)
 	tname := t.Obj()
-	torigin := t.Origin()
+	torigin := aliases.Origin(t)
 
 	if !declaredWithin(tname, subst.origin) {
 		// t is declared outside of the function origin. So t is a package level type alias.
@@ -361,10 +361,15 @@ func (subst *subster) alias(t *types.Alias) types.Type {
 		}
 
 		// Substitute rhs.
-		rhs := subst.typ(t.Rhs())
+		rhs := subst.typ(aliases.Rhs(t))
 
 		// Create the fresh alias.
-		obj := aliases.New(tname.Pos(), tname.Pkg(), tname.Name(), rhs, newTParams)
+		//
+		// Until 1.27, the result of aliases.NewAlias(...).Type() cannot guarantee it is a *types.Alias.
+		// However, as t is an *alias.Alias and t is well-typed, then aliases must have been enabled.
+		// Follow this decision, and always enable aliases here.
+		const enabled = true
+		obj := aliases.NewAlias(enabled, tname.Pos(), tname.Pkg(), tname.Name(), rhs, newTParams)
 
 		// Substitute into all of the constraints after they are created.
 		for i, ntp := range newTParams {

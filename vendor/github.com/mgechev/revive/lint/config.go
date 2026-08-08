@@ -15,9 +15,9 @@ type RuleConfig struct {
 	Arguments Arguments
 	Severity  Severity
 	Disabled  bool
-	// Exclude is rule-level file excludes, TOML related (strings).
+	// Exclude - rule-level file excludes, TOML related (strings)
 	Exclude []string
-	// excludeFilters is regex-based file filters, initialized from Exclude.
+	// excludeFilters - regex-based file filters, initialized from Exclude
 	excludeFilters []*FileFilter
 }
 
@@ -56,11 +56,10 @@ type DirectivesConfig = map[string]DirectiveConfig
 
 // Config defines the config of the linter.
 type Config struct {
-	IgnoreGeneratedHeader bool             `toml:"ignoreGeneratedHeader"`
-	Confidence            float64          `toml:"confidence"`
-	Severity              Severity         `toml:"severity"`
+	IgnoreGeneratedHeader bool `toml:"ignoreGeneratedHeader"`
+	Confidence            float64
+	Severity              Severity
 	EnableAllRules        bool             `toml:"enableAllRules"`
-	EnableDefaultRules    bool             `toml:"enableDefaultRules"`
 	Rules                 RulesConfig      `toml:"rule"`
 	ErrorCode             int              `toml:"errorCode"`
 	WarningCode           int              `toml:"warningCode"`
@@ -68,5 +67,5 @@ type Config struct {
 	Exclude               []string         `toml:"exclude"`
 	// If set, overrides the go language version specified in go.mod of
 	// packages being linted, and assumes this specific language version.
-	GoVersion *goversion.Version `toml:"goVersion"`
+	GoVersion *goversion.Version
 }

@@ -6,6 +6,8 @@ import (
 	"go/token"
 	"go/types"
 	"reflect"
+
+	"golang.org/x/tools/go/ast/astutil"
 )
 
 var tokensByString = map[string]Token{
@@ -424,7 +426,7 @@ func matchAST(m *Matcher, a, b ast.Node) (any, bool) {
 			if af.Bool() != bf.Bool() {
 				return nil, false
 			}
-		case reflect.Pointer, reflect.Interface:
+		case reflect.Ptr, reflect.Interface:
 			if _, ok := match(m, af.Interface(), bf.Interface()); !ok {
 				return nil, false
 			}
@@ -567,8 +569,9 @@ func (fn Symbol) Match(m *Matcher, node any) (any, bool) {
 	case *ast.IndexListExpr:
 		fun = idx.X
 	}
+	fun = astutil.Unparen(fun)
 
-	switch fun := ast.Unparen(fun).(type) {
+	switch fun := fun.(type) {
 	case *ast.Ident:
 		obj = m.TypesInfo.ObjectOf(fun)
 	case *ast.SelectorExpr:
@@ -689,10 +692,10 @@ func (texpr TrulyConstantExpression) Match(m *Matcher, node any) (any, bool) {
 
 var (
 	// Types of fields in go/ast structs that we want to skip
-	rtTokPos = reflect.TypeFor[token.Pos]()
+	rtTokPos = reflect.TypeOf(token.Pos(0))
 	//lint:ignore SA1019 It's deprecated, but we still want to skip the field.
-	rtObject       = reflect.TypeFor[*ast.Object]()
-	rtCommentGroup = reflect.TypeFor[*ast.CommentGroup]()
+	rtObject       = reflect.TypeOf((*ast.Object)(nil))
+	rtCommentGroup = reflect.TypeOf((*ast.CommentGroup)(nil))
 )
 
 var (

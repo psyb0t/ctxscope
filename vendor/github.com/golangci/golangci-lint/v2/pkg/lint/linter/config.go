@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
-	"go.yaml.in/yaml/v3"
 	"golang.org/x/tools/go/packages"
+	"gopkg.in/yaml.v3"
 
 	"github.com/golangci/golangci-lint/v2/pkg/config"
 )
@@ -185,18 +185,15 @@ func Replacement[T any](replacement string, mgr func(T) any, data T) func(*Depre
 			encoder := yaml.NewEncoder(buf)
 			encoder.SetIndent(2)
 
-			linters := map[string]any{
-				"enable": []string{d.Replacement},
-			}
-
-			replacementSettings := mgr(data)
-
-			if replacementSettings != nil {
-				linters["settings"] = map[string]any{d.Replacement: replacementSettings}
-			}
-
 			suggestion := map[string]any{
-				"linters": linters,
+				"linters": map[string]any{
+					"enable": []string{
+						d.Replacement,
+					},
+					"settings": map[string]any{
+						d.Replacement: mgr(data),
+					},
+				},
 			}
 
 			err := encoder.Encode(suggestion)

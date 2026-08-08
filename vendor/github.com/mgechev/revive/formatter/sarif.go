@@ -6,11 +6,10 @@ import (
 	"strings"
 
 	"codeberg.org/chavacava/garif"
-
 	"github.com/mgechev/revive/lint"
 )
 
-// Sarif is an implementation of the [lint.Formatter] interface
+// Sarif is an implementation of the Formatter interface
 // which formats revive failures into SARIF format.
 type Sarif struct {
 	Metadata lint.FormatterMetadata
@@ -32,17 +31,13 @@ func (*Sarif) Format(failures <-chan lint.Failure, cfg lint.Config) (string, err
 	}
 
 	buf := new(bytes.Buffer)
-	err := sarifLog.PrettyWrite(buf)
-	if err != nil {
-		return "", err
-	}
+	sarifLog.PrettyWrite(buf)
 
 	return buf.String(), nil
 }
 
 type reviveRunLog struct {
 	*garif.LogFile
-
 	run   *garif.Run
 	rules map[string]lint.RuleConfig
 }

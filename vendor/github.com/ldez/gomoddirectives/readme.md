@@ -35,9 +35,9 @@ linters:
       # Default: false
       exclude-forbidden: true
   
-      # Forbid the use of the `ignore` directives (go >= 1.25).
+      # Forbid the use of the `ignore` directives.
       # Default: false
-      ignore-forbidden: true
+      exclude-ignore: true
   
       # Forbid the use of the `toolchain` directive.
       # Default: false
@@ -58,10 +58,6 @@ linters:
       # Defines a pattern to validate `go` minimum version directive.
       # Default: '' (no match)
       go-version-pattern: '1\.\d+(\.0)?$'
-
-      # Check the validity of the module path.
-      # Default: false
-      check-module-path: true
 ```
 
 ### As a CLI
@@ -70,8 +66,6 @@ linters:
 gomoddirectives [flags]
 
 Flags:
-  -check-module-path
-        Check module path validity
   -exclude
         Forbid the use of exclude directives
   -godebug
@@ -225,14 +219,4 @@ godebug (
 module example.com/foo
 
 go 1.22.0
-```
-
-### [`module`](https://go.dev/ref/mod#module-path) path
-
-- Check the validity of the module path.
-
-```go
-module example.com/foo
-
-go 1.22
 ```

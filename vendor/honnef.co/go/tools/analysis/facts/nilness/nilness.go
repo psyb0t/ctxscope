@@ -35,7 +35,7 @@ var Analysis = &analysis.Analyzer{
 	Run:        run,
 	Requires:   []*analysis.Analyzer{buildir.Analyzer},
 	FactTypes:  []analysis.Fact{(*neverReturnsNilFact)(nil)},
-	ResultType: reflect.TypeFor[*Result](),
+	ResultType: reflect.TypeOf((*Result)(nil)),
 }
 
 // MayReturnNil reports whether the ret's return value of fn might be

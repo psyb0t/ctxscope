@@ -5,9 +5,8 @@ import (
 	"go/ast"
 	"go/token"
 
-	"golang.org/x/tools/go/ast/astutil"
-
 	"github.com/mgechev/revive/lint"
+	"golang.org/x/tools/go/ast/astutil"
 )
 
 // CognitiveComplexityRule sets restriction for maximum cognitive complexity.
@@ -95,7 +94,7 @@ func (v *cognitiveComplexityVisitor) subTreeComplexity(n ast.Node) int {
 	return v.complexity
 }
 
-// Visit implements the [ast.Visitor] interface.
+// Visit implements the ast.Visitor interface.
 func (v *cognitiveComplexityVisitor) Visit(n ast.Node) ast.Visitor {
 	switch n := n.(type) {
 	case *ast.IfStmt:

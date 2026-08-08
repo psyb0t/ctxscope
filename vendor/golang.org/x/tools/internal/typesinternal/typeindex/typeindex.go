@@ -217,7 +217,7 @@ func (ix *Index) Selection(path, typename, name string) types.Object {
 func (ix *Index) Calls(callee types.Object) iter.Seq[inspector.Cursor] {
 	return func(yield func(inspector.Cursor) bool) {
 		for cur := range ix.Uses(callee) {
-			ek := cur.ParentEdgeKind()
+			ek, _ := cur.ParentEdge()
 
 			// The call may be of the form f() or x.f(),
 			// optionally with parens; ascend from f to call.
@@ -231,19 +231,19 @@ func (ix *Index) Calls(callee types.Object) iter.Seq[inspector.Cursor] {
 			// inverse unparen: f -> (f)
 			for ek == edge.ParenExpr_X {
 				cur = cur.Parent()
-				ek = cur.ParentEdgeKind()
+				ek, _ = cur.ParentEdge()
 			}
 
 			// ascend selector: f -> x.f
 			if ek == edge.SelectorExpr_Sel {
 				cur = cur.Parent()
-				ek = cur.ParentEdgeKind()
+				ek, _ = cur.ParentEdge()
 			}
 
 			// inverse unparen again
 			for ek == edge.ParenExpr_X {
 				cur = cur.Parent()
-				ek = cur.ParentEdgeKind()
+				ek, _ = cur.ParentEdge()
 			}
 
 			// ascend from f or x.f to call

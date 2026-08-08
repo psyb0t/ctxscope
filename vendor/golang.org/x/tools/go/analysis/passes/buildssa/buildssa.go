@@ -16,7 +16,9 @@ import (
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/ctrlflow"
+	"golang.org/x/tools/go/analysis/passes/internal/ctrlflowinternal"
 	"golang.org/x/tools/go/ssa"
+	"golang.org/x/tools/internal/ssainternal"
 )
 
 var Analyzer = &analysis.Analyzer{
@@ -60,7 +62,9 @@ func run(pass *analysis.Pass) (any, error) {
 	prog := ssa.NewProgram(pass.Fset, mode)
 
 	// Use the result of the ctrlflow analysis to improve the SSA CFG.
-	prog.SetNoReturn(cfgs.NoReturn)
+	ssainternal.SetNoReturn(prog, func(fn *types.Func) bool {
+		return ctrlflowinternal.NoReturn(cfgs, fn)
+	})
 
 	// Create SSA packages for direct imports.
 	for _, p := range pass.Pkg.Imports() {

@@ -6,7 +6,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-func Analyze(pass *analysis.Pass, st *ast.StructType, emptyLine, forbidMutex bool) {
+func Analyze(pass *analysis.Pass, st *ast.StructType, forbidMutex bool) {
 	var firstEmbeddedField *ast.Field
 
 	var lastEmbeddedField *ast.Field
@@ -34,9 +34,7 @@ func Analyze(pass *analysis.Pass, st *ast.StructType, emptyLine, forbidMutex boo
 		}
 	}
 
-	if emptyLine {
-		checkMissingSpace(pass, lastEmbeddedField, firstNotEmbeddedField)
-	}
+	checkMissingSpace(pass, lastEmbeddedField, firstNotEmbeddedField)
 }
 
 func checkForbiddenEmbeddedField(pass *analysis.Pass, field *ast.Field, forbidMutex bool) {

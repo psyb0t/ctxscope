@@ -7,8 +7,6 @@ var matcherOnlyRules = Rules{
 	&EqualBoolRule{},
 	&EqualNilRule{},
 	&DoubleNegativeRule{},
-	// must be the last rule in the list
-	&SimplifyNotRule{},
 }
 
 func getMatcherOnlyRules() Rules {

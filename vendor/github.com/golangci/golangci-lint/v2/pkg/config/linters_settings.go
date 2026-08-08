@@ -24,9 +24,6 @@ var defaultLintersSettings = LintersSettings{
 	Dupl: DuplSettings{
 		Threshold: 150,
 	},
-	EmbeddedStructFieldCheck: EmbeddedStructFieldCheckSettings{
-		EmptyLine: true,
-	},
 	ErrorLint: ErrorLintSettings{
 		Errorf:      true,
 		ErrorfMulti: true,
@@ -131,7 +128,6 @@ var defaultLintersSettings = LintersSettings{
 		StrConcat:     true,
 		BoolFormat:    true,
 		HexFormat:     true,
-		ConcatLoop:    true,
 	},
 	Prealloc: PreallocSettings{
 		Simple:     true,
@@ -141,20 +137,17 @@ var defaultLintersSettings = LintersSettings{
 	Predeclared: PredeclaredSettings{
 		Qualified: false,
 	},
-	Sloglint: SloglintSettings{
-		NoGlobal:       "",
-		Context:        "",
-		StaticMsg:      false,
-		MsgStyle:       "",
+	SlogLint: SlogLintSettings{
 		NoMixedArgs:    true,
 		KVOnly:         false,
 		AttrOnly:       false,
-		ArgsOnSepLines: false,
+		NoGlobal:       "",
+		Context:        "",
+		StaticMsg:      false,
 		NoRawKeys:      false,
-		AllowedKeys:    []string{},
-		ForbiddenKeys:  []string{},
 		KeyNamingCase:  "",
-		CustomFuncs:    []SloglintCustomFunc{},
+		ForbiddenKeys:  nil,
+		ArgsOnSepLines: false,
 	},
 	TagAlign: TagAlignSettings{
 		Align:  true,
@@ -165,27 +158,6 @@ var defaultLintersSettings = LintersSettings{
 	Testpackage: TestpackageSettings{
 		SkipRegexp:    `(export|internal)_test\.go`,
 		AllowPackages: []string{"main"},
-	},
-	Unqueryvet: UnqueryvetSettings{
-		CheckSQLBuilders:     true,
-		CheckAliasedWildcard: true,
-		CheckStringConcat:    true,
-		CheckFormatStrings:   true,
-		CheckStringBuilder:   true,
-		CheckSubqueries:      true,
-		SQLBuilders: UnqueryvetSQLBuildersSettings{
-			Squirrel:  true,
-			GORM:      true,
-			SQLx:      true,
-			Ent:       true,
-			PGX:       true,
-			Bun:       true,
-			SQLBoiler: true,
-			Jet:       true,
-		},
-		CheckN1:           false,
-		CheckSQLInjection: false,
-		CheckTxLeak:       false,
 	},
 	Unused: UnusedSettings{
 		FieldWritesAreUses:     true,
@@ -229,14 +201,13 @@ var defaultLintersSettings = LintersSettings{
 		ForceExclusiveShortDeclarations:  false,
 	},
 	WSLv5: WSLv5Settings{
-		AllowFirstInBlock:   true,
-		AllowWholeBlock:     false,
-		BranchMaxLines:      2,
-		CaseMaxLines:        0,
-		CuddleMaxStatements: 1,
-		Default:             "default",
-		Enable:              nil,
-		Disable:             nil,
+		AllowFirstInBlock: true,
+		AllowWholeBlock:   false,
+		BranchMaxLines:    2,
+		CaseMaxLines:      0,
+		Default:           "default",
+		Enable:            nil,
+		Disable:           nil,
 	},
 }
 
@@ -245,7 +216,6 @@ type LintersSettings struct {
 
 	Asasalint                AsasalintSettings                `mapstructure:"asasalint"`
 	BiDiChk                  BiDiChkSettings                  `mapstructure:"bidichk"`
-	BodyClose                BodyCloseSettings                `mapstructure:"bodyclose"`
 	CopyLoopVar              CopyLoopVarSettings              `mapstructure:"copyloopvar"`
 	Cyclop                   CyclopSettings                   `mapstructure:"cyclop"`
 	Decorder                 DecorderSettings                 `mapstructure:"decorder"`
@@ -269,24 +239,19 @@ type LintersSettings struct {
 	Goconst                  GoConstSettings                  `mapstructure:"goconst"`
 	Gocritic                 GoCriticSettings                 `mapstructure:"gocritic"`
 	Gocyclo                  GoCycloSettings                  `mapstructure:"gocyclo"`
-	Godoclint                GodoclintSettings                `mapstructure:"godoclint"`
 	Godot                    GodotSettings                    `mapstructure:"godot"`
 	Godox                    GodoxSettings                    `mapstructure:"godox"`
 	Goheader                 GoHeaderSettings                 `mapstructure:"goheader"`
 	GoModDirectives          GoModDirectivesSettings          `mapstructure:"gomoddirectives"`
 	Gomodguard               GoModGuardSettings               `mapstructure:"gomodguard"`
-	Gomodguardv2             GoModGuardv2Settings             `mapstructure:"gomodguard_v2"`
 	Gosec                    GoSecSettings                    `mapstructure:"gosec"`
 	Gosmopolitan             GosmopolitanSettings             `mapstructure:"gosmopolitan"`
-	Unqueryvet               UnqueryvetSettings               `mapstructure:"unqueryvet"`
 	Govet                    GovetSettings                    `mapstructure:"govet"`
 	Grouper                  GrouperSettings                  `mapstructure:"grouper"`
 	Iface                    IfaceSettings                    `mapstructure:"iface"`
 	ImportAs                 ImportAsSettings                 `mapstructure:"importas"`
 	Inamedparam              INamedParamSettings              `mapstructure:"inamedparam"`
-	Ineffassign              IneffassignSettings              `mapstructure:"ineffassign"`
 	InterfaceBloat           InterfaceBloatSettings           `mapstructure:"interfacebloat"`
-	IotaMixing               IotaMixingSettings               `mapstructure:"iotamixing"`
 	Ireturn                  IreturnSettings                  `mapstructure:"ireturn"`
 	Lll                      LllSettings                      `mapstructure:"lll"`
 	LoggerCheck              LoggerCheckSettings              `mapstructure:"loggercheck"`
@@ -294,7 +259,6 @@ type LintersSettings struct {
 	Makezero                 MakezeroSettings                 `mapstructure:"makezero"`
 	Misspell                 MisspellSettings                 `mapstructure:"misspell"`
 	Mnd                      MndSettings                      `mapstructure:"mnd"`
-	Modernize                ModernizeSettings                `mapstructure:"modernize"`
 	MustTag                  MustTagSettings                  `mapstructure:"musttag"`
 	Nakedret                 NakedretSettings                 `mapstructure:"nakedret"`
 	Nestif                   NestifSettings                   `mapstructure:"nestif"`
@@ -312,7 +276,7 @@ type LintersSettings struct {
 	Recvcheck                RecvcheckSettings                `mapstructure:"recvcheck"`
 	Revive                   ReviveSettings                   `mapstructure:"revive"`
 	RowsErrCheck             RowsErrCheckSettings             `mapstructure:"rowserrcheck"`
-	Sloglint                 SloglintSettings                 `mapstructure:"sloglint"`
+	SlogLint                 SlogLintSettings                 `mapstructure:"sloglint"`
 	Spancheck                SpancheckSettings                `mapstructure:"spancheck"`
 	Staticcheck              StaticCheckSettings              `mapstructure:"staticcheck"`
 	TagAlign                 TagAlignSettings                 `mapstructure:"tagalign"`
@@ -365,10 +329,6 @@ type BiDiChkSettings struct {
 	PopDirectionalIsolate    bool `mapstructure:"pop-directional-isolate"`
 }
 
-type BodyCloseSettings struct {
-	CheckConsumption bool `mapstructure:"check-consumption"`
-}
-
 type CopyLoopVarSettings struct {
 	CheckAlias bool `mapstructure:"check-alias"`
 }
@@ -414,14 +374,12 @@ type DuplSettings struct {
 }
 
 type DupWordSettings struct {
-	Keywords     []string `mapstructure:"keywords"`
-	Ignore       []string `mapstructure:"ignore"`
-	CommentsOnly bool     `mapstructure:"comments-only"`
+	Keywords []string `mapstructure:"keywords"`
+	Ignore   []string `mapstructure:"ignore"`
 }
 
 type EmbeddedStructFieldCheckSettings struct {
 	ForbidMutex bool `mapstructure:"forbid-mutex"`
-	EmptyLine   bool `mapstructure:"empty-line"`
 }
 
 type ErrcheckSettings struct {
@@ -513,7 +471,6 @@ type GinkgoLinterSettings struct {
 	ForbidSpecPollution        bool `mapstructure:"forbid-spec-pollution"`
 	ForceSucceedForFuncs       bool `mapstructure:"force-succeed"`
 	ForceAssertionDescription  bool `mapstructure:"force-assertion-description"`
-	ForeToNot                  bool `mapstructure:"force-tonot"`
 }
 
 type GoChecksumTypeSettings struct {
@@ -536,11 +493,6 @@ type GoConstSettings struct {
 	IgnoreCalls          bool     `mapstructure:"ignore-calls"`
 	FindDuplicates       bool     `mapstructure:"find-duplicates"`
 	EvalConstExpressions bool     `mapstructure:"eval-const-expressions"`
-	IgnoreFunctions      []string `mapstructure:"ignore-functions"`
-
-	// This option cannot be managed with `linters.exclusions.rules`.
-	// Because the linter counts occurrences across all files in the package.
-	IgnoreTests bool `mapstructure:"ignore-tests"`
 
 	// Deprecated: use IgnoreStringValues instead.
 	IgnoreStrings string `mapstructure:"ignore-strings"`
@@ -561,24 +513,6 @@ type GoCriticCheckSettings map[string]any
 
 type GoCycloSettings struct {
 	MinComplexity int `mapstructure:"min-complexity"`
-}
-
-type GodoclintSettings struct {
-	Default *string  `mapstructure:"default"`
-	Enable  []string `mapstructure:"enable"`
-	Disable []string `mapstructure:"disable"`
-	Options struct {
-		MaxLen struct {
-			Length *uint `mapstructure:"length"`
-		} `mapstructure:"max-len"`
-		RequireDoc struct {
-			IgnoreExported   *bool `mapstructure:"ignore-exported"`
-			IgnoreUnexported *bool `mapstructure:"ignore-unexported"`
-		} `mapstructure:"require-doc"`
-		StartWithName struct {
-			IncludeUnexported *bool `mapstructure:"include-unexported"`
-		} `mapstructure:"start-with-name"`
-	} `mapstructure:"options"`
 }
 
 type GodotSettings struct {
@@ -608,29 +542,8 @@ type GoModDirectivesSettings struct {
 	ToolForbidden             bool     `mapstructure:"tool-forbidden"`
 	GoDebugForbidden          bool     `mapstructure:"go-debug-forbidden"`
 	GoVersionPattern          string   `mapstructure:"go-version-pattern"`
-	CheckModulePath           bool     `mapstructure:"check-module-path"`
 }
 
-type GoModGuardv2Settings struct {
-	Allowed                []GoModGuardv2Base    `mapstructure:"allowed"`
-	Blocked                []GoModGuardv2Blocked `mapstructure:"blocked"`
-	LocalReplaceDirectives bool                  `mapstructure:"local-replace-directives"`
-}
-
-type GoModGuardv2Base struct {
-	Module    string `mapstructure:"module"`
-	Version   string `mapstructure:"version"`
-	MatchType string `mapstructure:"match-type"`
-}
-
-type GoModGuardv2Blocked struct {
-	GoModGuardv2Base `mapstructure:",squash"`
-
-	Recommendations []string `mapstructure:"recommendations"`
-	Reason          string   `mapstructure:"reason"`
-}
-
-// Deprecated: use GoModGuardv2Settings instead.
 type GoModGuardSettings struct {
 	Allowed GoModGuardAllowed `mapstructure:"allowed"`
 	Blocked GoModGuardBlocked `mapstructure:"blocked"`
@@ -727,16 +640,8 @@ type INamedParamSettings struct {
 	SkipSingleParam bool `mapstructure:"skip-single-param"`
 }
 
-type IneffassignSettings struct {
-	CheckEscapingErrors bool `mapstructure:"check-escaping-errors"`
-}
-
 type InterfaceBloatSettings struct {
 	Max int `mapstructure:"max"`
-}
-
-type IotaMixingSettings struct {
-	ReportIndividual bool `mapstructure:"report-individual"`
 }
 
 type IreturnSettings struct {
@@ -815,10 +720,6 @@ type MndSettings struct {
 	IgnoredFunctions []string `mapstructure:"ignored-functions"`
 }
 
-type ModernizeSettings struct {
-	Disable []string `mapstructure:"disable"`
-}
-
 type NoLintLintSettings struct {
 	RequireExplanation bool     `mapstructure:"require-explanation"`
 	RequireSpecific    bool     `mapstructure:"require-specific"`
@@ -834,7 +735,6 @@ type ParallelTestSettings struct {
 	Go                    string `mapstructure:"-"`
 	IgnoreMissing         bool   `mapstructure:"ignore-missing"`
 	IgnoreMissingSubtests bool   `mapstructure:"ignore-missing-subtests"`
-	CheckCleanup          bool   `mapstructure:"check-cleanup"`
 }
 
 type PerfSprintSettings struct {
@@ -851,9 +751,6 @@ type PerfSprintSettings struct {
 
 	BoolFormat bool `mapstructure:"bool-format"`
 	HexFormat  bool `mapstructure:"hex-format"`
-
-	ConcatLoop   bool `mapstructure:"concat-loop"`
-	LoopOtherOps bool `mapstructure:"loop-other-ops"`
 }
 
 type PreallocSettings struct {
@@ -889,16 +786,15 @@ type RecvcheckSettings struct {
 }
 
 type ReviveSettings struct {
-	Go                 string            `mapstructure:"-"`
-	MaxOpenFiles       int               `mapstructure:"max-open-files"`
-	Confidence         float64           `mapstructure:"confidence"`
-	Severity           string            `mapstructure:"severity"`
-	EnableAllRules     bool              `mapstructure:"enable-all-rules"`
-	EnableDefaultRules bool              `mapstructure:"enable-default-rules"`
-	Rules              []ReviveRule      `mapstructure:"rules"`
-	ErrorCode          int               `mapstructure:"error-code"`
-	WarningCode        int               `mapstructure:"warning-code"`
-	Directives         []ReviveDirective `mapstructure:"directives"`
+	Go             string            `mapstructure:"-"`
+	MaxOpenFiles   int               `mapstructure:"max-open-files"`
+	Confidence     float64           `mapstructure:"confidence"`
+	Severity       string            `mapstructure:"severity"`
+	EnableAllRules bool              `mapstructure:"enable-all-rules"`
+	Rules          []ReviveRule      `mapstructure:"rules"`
+	ErrorCode      int               `mapstructure:"error-code"`
+	WarningCode    int               `mapstructure:"warning-code"`
+	Directives     []ReviveDirective `mapstructure:"directives"`
 }
 
 type ReviveRule struct {
@@ -918,26 +814,18 @@ type RowsErrCheckSettings struct {
 	Packages []string `mapstructure:"packages"`
 }
 
-type SloglintSettings struct {
-	NoGlobal       string               `mapstructure:"no-global"`
-	Context        string               `mapstructure:"context"`
-	StaticMsg      bool                 `mapstructure:"static-msg"`
-	MsgStyle       string               `mapstructure:"msg-style"`
-	NoMixedArgs    bool                 `mapstructure:"no-mixed-args"`
-	KVOnly         bool                 `mapstructure:"kv-only"`
-	AttrOnly       bool                 `mapstructure:"attr-only"`
-	ArgsOnSepLines bool                 `mapstructure:"args-on-sep-lines"`
-	NoRawKeys      bool                 `mapstructure:"no-raw-keys"`
-	AllowedKeys    []string             `mapstructure:"allowed-keys"`
-	ForbiddenKeys  []string             `mapstructure:"forbidden-keys"`
-	KeyNamingCase  string               `mapstructure:"key-naming-case"`
-	CustomFuncs    []SloglintCustomFunc `mapstructure:"custom-funcs"`
-}
-
-type SloglintCustomFunc struct {
-	Name    string `mapstructure:"name"`
-	MsgPos  int    `mapstructure:"msg-pos"`
-	ArgsPos int    `mapstructure:"args-pos"`
+type SlogLintSettings struct {
+	NoMixedArgs    bool     `mapstructure:"no-mixed-args"`
+	KVOnly         bool     `mapstructure:"kv-only"`
+	AttrOnly       bool     `mapstructure:"attr-only"`
+	NoGlobal       string   `mapstructure:"no-global"`
+	Context        string   `mapstructure:"context"`
+	StaticMsg      bool     `mapstructure:"static-msg"`
+	MsgStyle       string   `mapstructure:"msg-style"`
+	NoRawKeys      bool     `mapstructure:"no-raw-keys"`
+	KeyNamingCase  string   `mapstructure:"key-naming-case"`
+	ForbiddenKeys  []string `mapstructure:"forbidden-keys"`
+	ArgsOnSepLines bool     `mapstructure:"args-on-sep-lines"`
 }
 
 type SpancheckSettings struct {
@@ -1083,43 +971,6 @@ type UnparamSettings struct {
 	CheckExported bool `mapstructure:"check-exported"`
 }
 
-type UnqueryvetSettings struct {
-	CheckSQLBuilders     bool                          `mapstructure:"check-sql-builders"`
-	AllowedPatterns      []string                      `mapstructure:"allowed-patterns"`
-	IgnoredFunctions     []string                      `mapstructure:"ignored-functions"`
-	CheckAliasedWildcard bool                          `mapstructure:"check-aliased-wildcard"`
-	CheckStringConcat    bool                          `mapstructure:"check-string-concat"`
-	CheckFormatStrings   bool                          `mapstructure:"check-format-strings"`
-	CheckStringBuilder   bool                          `mapstructure:"check-string-builder"`
-	CheckSubqueries      bool                          `mapstructure:"check-subqueries"`
-	CheckN1              bool                          `mapstructure:"check-n1"`
-	CheckSQLInjection    bool                          `mapstructure:"check-sql-injection"`
-	CheckTxLeak          bool                          `mapstructure:"check-tx-leaks"`
-	SQLBuilders          UnqueryvetSQLBuildersSettings `mapstructure:"sql-builders"`
-	Allow                []string                      `mapstructure:"allow"`
-	CustomRules          []UnqueryvetCustomRule        `mapstructure:"custom-rules"`
-}
-
-type UnqueryvetSQLBuildersSettings struct {
-	Squirrel  bool `mapstructure:"squirrel"`
-	GORM      bool `mapstructure:"gorm"`
-	SQLx      bool `mapstructure:"sqlx"`
-	Ent       bool `mapstructure:"ent"`
-	PGX       bool `mapstructure:"pgx"`
-	Bun       bool `mapstructure:"bun"`
-	SQLBoiler bool `mapstructure:"sqlboiler"`
-	Jet       bool `mapstructure:"jet"`
-}
-
-type UnqueryvetCustomRule struct {
-	ID       string   `mapstructure:"id"`
-	Pattern  string   `mapstructure:"pattern"`
-	Patterns []string `mapstructure:"patterns"`
-	When     string   `mapstructure:"when"`
-	Message  string   `mapstructure:"message"`
-	Action   string   `mapstructure:"action"`
-}
-
 type UnusedSettings struct {
 	FieldWritesAreUses     bool `mapstructure:"field-writes-are-uses"`
 	PostStatementsAreReads bool `mapstructure:"post-statements-are-reads"`
@@ -1175,14 +1026,13 @@ type WSLv4Settings struct {
 }
 
 type WSLv5Settings struct {
-	AllowFirstInBlock   bool     `mapstructure:"allow-first-in-block"`
-	AllowWholeBlock     bool     `mapstructure:"allow-whole-block"`
-	BranchMaxLines      int      `mapstructure:"branch-max-lines"`
-	CaseMaxLines        int      `mapstructure:"case-max-lines"`
-	CuddleMaxStatements int      `mapstructure:"cuddle-max-statements"`
-	Default             string   `mapstructure:"default"`
-	Enable              []string `mapstructure:"enable"`
-	Disable             []string `mapstructure:"disable"`
+	AllowFirstInBlock bool     `mapstructure:"allow-first-in-block"`
+	AllowWholeBlock   bool     `mapstructure:"allow-whole-block"`
+	BranchMaxLines    int      `mapstructure:"branch-max-lines"`
+	CaseMaxLines      int      `mapstructure:"case-max-lines"`
+	Default           string   `mapstructure:"default"`
+	Enable            []string `mapstructure:"enable"`
+	Disable           []string `mapstructure:"disable"`
 }
 
 // CustomLinterSettings encapsulates the meta-data of a private linter.

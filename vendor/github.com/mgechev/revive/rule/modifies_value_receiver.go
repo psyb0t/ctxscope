@@ -35,7 +35,7 @@ func (r *ModifiesValRecRule) Apply(file *lint.File, _ lint.Arguments) []lint.Fai
 			continue // receiver is not modified
 		}
 
-		methodReturnsReceiver := r.seekReturnReceiverStatement(receiverName, funcDecl.Body) != nil
+		methodReturnsReceiver := len(r.findReturnReceiverStatements(receiverName, funcDecl.Body)) > 0
 		if methodReturnsReceiver {
 			continue // modification seems legit (see issue #1066)
 		}
@@ -79,7 +79,7 @@ func (*ModifiesValRecRule) getNameFromExpr(ie ast.Expr) string {
 	return ident.Name
 }
 
-func (r *ModifiesValRecRule) seekReturnReceiverStatement(receiverName string, target ast.Node) ast.Node {
+func (r *ModifiesValRecRule) findReturnReceiverStatements(receiverName string, target ast.Node) []ast.Node {
 	finder := func(n ast.Node) bool {
 		// look for returns with the receiver as value
 		returnStatement, ok := n.(*ast.ReturnStmt)
@@ -117,7 +117,7 @@ func (r *ModifiesValRecRule) seekReturnReceiverStatement(receiverName string, ta
 		return false
 	}
 
-	return astutils.SeekNode[ast.Node](target, finder)
+	return astutils.PickNodes(target, finder)
 }
 
 func (r *ModifiesValRecRule) mustSkip(receiver *ast.Field, pkg *lint.Package) bool {

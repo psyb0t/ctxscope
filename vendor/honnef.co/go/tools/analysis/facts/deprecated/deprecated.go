@@ -25,7 +25,7 @@ var Analyzer = &analysis.Analyzer{
 	Doc:        "Mark deprecated objects",
 	Run:        deprecated,
 	FactTypes:  []analysis.Fact{(*IsDeprecated)(nil)},
-	ResultType: reflect.TypeFor[Result](),
+	ResultType: reflect.TypeOf(Result{}),
 }
 
 func deprecated(pass *analysis.Pass) (any, error) {
@@ -36,8 +36,8 @@ func deprecated(pass *analysis.Pass) (any, error) {
 			if doc == nil {
 				continue
 			}
-			parts := strings.SplitSeq(doc.Text(), "\n\n")
-			for part := range parts {
+			parts := strings.Split(doc.Text(), "\n\n")
+			for _, part := range parts {
 				if !strings.HasPrefix(part, "Deprecated: ") {
 					continue
 				}

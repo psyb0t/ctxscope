@@ -29,5 +29,5 @@ var Analyzer = &analysis.Analyzer{
 	},
 	RunDespiteErrors: true,
 	Requires:         []*analysis.Analyzer{inspect.Analyzer},
-	ResultType:       reflect.TypeFor[*typeindex.Index](),
+	ResultType:       reflect.TypeOf(new(typeindex.Index)),
 }

@@ -6,7 +6,6 @@ import (
 	"go/build"
 	"go/token"
 	"os"
-	"sync"
 
 	"github.com/go-critic/go-critic/checkers/rulesdata"
 	"github.com/go-critic/go-critic/linter"
@@ -15,42 +14,6 @@ import (
 )
 
 //go:generate go run ./rules/precompile.go -rules ./rules/rules.go -o ./rulesdata/rulesdata.go
-
-// cachedEngine holds a pre-initialized ruleguard engine for a specific rule group.
-// The engine is created once and reused for all checker instances.
-type cachedEngine struct {
-	engine *ruleguard.Engine
-	once   sync.Once
-	err    error
-
-	// Configuration needed to create the engine
-	fset         *token.FileSet
-	buildContext *build.Context
-	groupName    string
-	debug        bool
-}
-
-func (ce *cachedEngine) get() (*ruleguard.Engine, error) {
-	ce.once.Do(func() {
-		parseContext := &ruleguard.LoadContext{
-			Fset: ce.fset,
-			GroupFilter: func(gr *ruleguard.GoRuleGroup) bool {
-				return gr.Name == ce.groupName
-			},
-			DebugImports: ce.debug,
-			DebugPrint: func(s string) {
-				fmt.Println("debug:", s)
-			},
-		}
-		engine := ruleguard.NewEngine()
-		engine.BuildContext = ce.buildContext
-		ce.err = engine.LoadFromIR(parseContext, "rules/rules.go", rulesdata.PrecompiledRules)
-		if ce.err == nil {
-			ce.engine = engine
-		}
-	})
-	return ce.engine, ce.err
-}
 
 func InitEmbeddedRules() error {
 	filename := "rules/rules.go"
@@ -86,8 +49,8 @@ func InitEmbeddedRules() error {
 		groups = rootEngine.LoadedGroups()
 	}
 
-	// For every rules group we create a cached engine holder.
-	// The engine will be created lazily on first use and then reused.
+	// For every rules group we create a new checker and a separate engine.
+	// That dedicated ruleguard engine will contain rules only from one group.
 	for i := range groups {
 		g := groups[i]
 		info := &linter.CheckerInfo{
@@ -100,17 +63,20 @@ func InitEmbeddedRules() error {
 
 			EmbeddedRuleguard: true,
 		}
-
-		// Create a cached engine for this rule group
-		cache := &cachedEngine{
-			fset:         fset,
-			buildContext: buildContext,
-			groupName:    g.Name,
-			debug:        ruleguardDebug,
-		}
-
 		collection.AddChecker(info, func(ctx *linter.CheckerContext) (linter.FileWalker, error) {
-			engine, err := cache.get()
+			parseContext := &ruleguard.LoadContext{
+				Fset: fset,
+				GroupFilter: func(gr *ruleguard.GoRuleGroup) bool {
+					return gr.Name == g.Name
+				},
+				DebugImports: ruleguardDebug,
+				DebugPrint: func(s string) {
+					fmt.Println("debug:", s)
+				},
+			}
+			engine := ruleguard.NewEngine()
+			engine.BuildContext = buildContext
+			err := engine.LoadFromIR(parseContext, filename, rulesdata.PrecompiledRules)
 			if err != nil {
 				return nil, err
 			}

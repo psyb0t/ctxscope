@@ -7,7 +7,7 @@ import (
 	"github.com/mgechev/revive/lint"
 )
 
-// Default is an implementation of the [lint.Formatter] interface
+// Default is an implementation of the Formatter interface
 // which formats the errors to text.
 type Default struct {
 	Metadata lint.FormatterMetadata
@@ -21,13 +21,8 @@ func (*Default) Name() string {
 // Format formats the failures gotten from the lint.
 func (*Default) Format(failures <-chan lint.Failure, _ lint.Config) (string, error) {
 	var buf bytes.Buffer
-	prefix := ""
 	for failure := range failures {
-		_, err := fmt.Fprintf(&buf, "%s%v: %s", prefix, failure.Position.Start, failure.Failure)
-		if err != nil {
-			return "", err
-		}
-		prefix = "\n"
+		fmt.Fprintf(&buf, "%v: %s\n", failure.Position.Start, failure.Failure)
 	}
 	return buf.String(), nil
 }

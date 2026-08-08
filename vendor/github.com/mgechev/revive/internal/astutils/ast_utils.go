@@ -1,10 +1,8 @@
-// Package astutils provides utility functions for working with AST nodes.
+// Package astutils provides utility functions for working with AST nodes
 package astutils
 
 import (
 	"bytes"
-	"crypto/md5" //nolint:gosec // G501: Blocklisted import crypto/md5: weak cryptographic primitive
-	"encoding/hex"
 	"fmt"
 	"go/ast"
 	"go/printer"
@@ -16,13 +14,8 @@ import (
 // FuncSignatureIs returns true if the given func decl satisfies a signature characterized
 // by the given name, parameters types and return types; false otherwise.
 //
-// Example: To check if a function declaration has the signature
-//
-//	Foo(int, string) (bool, error)
-//
-// call to
-//
-//	FuncSignatureIs(funcDecl, "Foo", []string{"int", "string"}, []string{"bool", "error"})
+// Example: to check if a function declaration has the signature Foo(int, string) (bool,error)
+// call to FuncSignatureIs(funcDecl,"Foo",[]string{"int","string"},[]string{"bool","error"}).
 func FuncSignatureIs(funcDecl *ast.FuncDecl, wantName string, wantParametersTypes, wantResultsTypes []string) bool {
 	if wantName != funcDecl.Name.String() {
 		return false // func name doesn't match expected one
@@ -157,65 +150,12 @@ func (p picker) Visit(node ast.Node) ast.Visitor {
 	return p
 }
 
-// SeekNode yields the first node selected by the given selector function in the AST subtree with root n.
-// The function returns nil if no matching node is found in the subtree.
-func SeekNode[T ast.Node](n ast.Node, selector func(n ast.Node) bool) T {
-	var result T
-
-	if n == nil {
-		return result
-	}
-
-	if selector == nil {
-		return result
-	}
-
-	onSelect := func(n ast.Node) {
-		result, _ = n.(T)
-	}
-
-	p := &seeker{selector: selector, onSelect: onSelect, found: false}
-	ast.Walk(p, n)
-
-	return result
-}
-
-type seeker struct {
-	selector func(n ast.Node) bool
-	onSelect func(n ast.Node)
-	found    bool
-}
-
-func (s *seeker) Visit(node ast.Node) ast.Visitor {
-	if s.found {
-		return nil // stop visiting subtree
-	}
-
-	if s.selector(node) {
-		s.onSelect(node)
-		s.found = true
-		return nil // skip visiting node children
-	}
-
-	return s
-}
-
 var gofmtConfig = &printer.Config{Tabwidth: 8}
 
 // GoFmt returns a string representation of an AST subtree.
 func GoFmt(x any) string {
 	buf := bytes.Buffer{}
 	fs := token.NewFileSet()
-	_ = gofmtConfig.Fprint(&buf, fs, x)
+	gofmtConfig.Fprint(&buf, fs, x)
 	return buf.String()
-}
-
-// NodeHash yields the MD5 hash of the given AST node.
-func NodeHash(node ast.Node) string {
-	hasher := func(in string) string {
-		binHash := md5.Sum([]byte(in)) //nolint:gosec // G401: Weak cryptographic primitive
-		return hex.EncodeToString(binHash[:])
-	}
-	str := GoFmt(node)
-	return hasher(str)
 }

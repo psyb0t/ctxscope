@@ -39,7 +39,8 @@ fnLoop:
 	for _, fn := range pass.ResultOf[buildir.Analyzer].(*buildir.IR).SrcFuncs {
 		if code.IsInTest(pass, fn) {
 			params := fn.Signature.Params()
-			for param := range params.Variables() {
+			for i := 0; i < params.Len(); i++ {
+				param := params.At(i)
 				if typeutil.IsPointerToTypeWithName(param.Type(), "testing.B") {
 					// Ignore discarded pure functions in code related
 					// to benchmarks. Instead of matching BenchmarkFoo

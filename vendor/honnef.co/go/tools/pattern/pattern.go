@@ -423,25 +423,23 @@ func (sym IndexSymbol) String() string {
 }
 
 func (or Or) String() string {
-	var s strings.Builder
-	s.WriteString("(Or")
+	s := "(Or"
 	for _, node := range or.Nodes {
-		s.WriteString(" ")
-		s.WriteString(node.String())
+		s += " "
+		s += node.String()
 	}
-	s.WriteString(")")
-	return s.String()
+	s += ")"
+	return s
 }
 
 func (and And) String() string {
-	var s strings.Builder
-	s.WriteString("(And")
+	s := "(And"
 	for _, node := range and.Nodes {
-		s.WriteString(" ")
-		s.WriteString(node.String())
+		s += " "
+		s += node.String()
 	}
-	s.WriteString(")")
-	return s.String()
+	s += ")"
+	return s
 }
 
 func isProperList(l List) bool {

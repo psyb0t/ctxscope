@@ -26,7 +26,6 @@ func New(settings *config.GinkgoLinterSettings) *goanalysis.Linter {
 			ForbidSpecPollution:       settings.ForbidSpecPollution,
 			ForceSucceedForFuncs:      settings.ForceSucceedForFuncs,
 			ForceAssertionDescription: settings.ForceAssertionDescription,
-			ForeToNot:                 settings.ForeToNot,
 		}
 	}
 

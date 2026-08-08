@@ -32,7 +32,7 @@ import (
 // If it cannot make the necessary edits, such as for a function
 // parameter or result, it returns nil.
 func DeleteVar(tokFile *token.File, info *types.Info, curId inspector.Cursor) []Edit {
-	switch curId.ParentEdgeKind() {
+	switch ek, _ := curId.ParentEdge(); ek {
 	case edge.ValueSpec_Names:
 		return deleteVarFromValueSpec(tokFile, info, curId)
 
@@ -74,7 +74,7 @@ func deleteVarFromValueSpec(tokFile *token.File, info *types.Info, curIdent insp
 	// at least one LHS, or for effects on RHS.
 	// Blank out or delete just one LHS.
 
-	index := curIdent.ParentEdgeIndex() // index of LHS within ValueSpec.Names
+	_, index := curIdent.ParentEdge() // index of LHS within ValueSpec.Names
 
 	// If there is no RHS, we can delete the LHS.
 	if len(spec.Values) == 0 {
@@ -181,7 +181,7 @@ func deleteVarFromAssignStmt(tokFile *token.File, info *types.Info, curIdent ins
 
 	// If the assignment is 1:1 and the RHS has no effects,
 	// we can delete the LHS and its corresponding RHS.
-	index := curIdent.ParentEdgeIndex()
+	_, index := curIdent.ParentEdge()
 	if len(assign.Lhs) > 1 &&
 		len(assign.Lhs) == len(assign.Rhs) &&
 		typesinternal.NoEffects(info, assign.Rhs[index]) {
@@ -259,7 +259,7 @@ func DeleteSpec(tokFile *token.File, curSpec inspector.Cursor) []Edit {
 	}
 
 	// Delete the spec and its comments.
-	index := curSpec.ParentEdgeIndex() // index of ValueSpec within GenDecl.Specs
+	_, index := curSpec.ParentEdge() // index of ValueSpec within GenDecl.Specs
 	pos, end := spec.Pos(), spec.End()
 	if doc := astutil.DocComment(spec); doc != nil {
 		pos = doc.Pos() // leading comment
@@ -288,7 +288,7 @@ func DeleteSpec(tokFile *token.File, curSpec inspector.Cursor) []Edit {
 func DeleteDecl(tokFile *token.File, curDecl inspector.Cursor) []Edit {
 	decl := curDecl.Node().(ast.Decl)
 
-	ek := curDecl.ParentEdgeKind()
+	ek, _ := curDecl.ParentEdge()
 	switch ek {
 	case edge.DeclStmt_Decl:
 		return DeleteStmt(tokFile, curDecl.Parent())

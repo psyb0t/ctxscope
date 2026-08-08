@@ -2,6 +2,23 @@
 
 All notable changes per release. Versions follow [semver](https://semver.org).
 
+## v1.0.2 — 2026-08-08
+
+Stops forcing a linter upgrade on everything that imports this module. No
+library code changed.
+
+- **Fixed:** the `tool` directive pinned `golangci-lint` at `v2.12.2`, the
+  latest at the time the module was created. A tool dependency still appears as
+  a `require` in `go.mod`, and Go selects the maximum version across the whole
+  module graph — so importing this package dragged every consumer's linter up
+  to `v2.12.2` regardless of what they had pinned. The newer linter then
+  reported dozens of findings in code those repos had not touched, turning a
+  one-line import change into a red build.
+
+  Now pinned to `v2.4.0`, matching `ctxerrors`, so importing this module cannot
+  raise anyone's linter. Same reasoning applies to any library carrying a
+  `tool` directive: pin conservatively, because it is not local to your module.
+
 ## v1.0.1 — 2026-08-08
 
 Documentation correction and the test coverage that would have caught it. No

@@ -42,8 +42,6 @@ var (
 	Go122 = goversion.Must(goversion.NewVersion("1.22"))
 	// Go124 is a constant representing the Go version 1.24.
 	Go124 = goversion.Must(goversion.NewVersion("1.24"))
-	// Go125 is a constant representing the Go version 1.25.
-	Go125 = goversion.Must(goversion.NewVersion("1.25"))
 )
 
 // Files return package's files.
@@ -142,7 +140,7 @@ func (p *Package) TypeCheck() error {
 	return err
 }
 
-// check function encapsulates the call to [go/types.Config.Check] method and
+// check function encapsulates the call to go/types.Config.Check method and
 // recovers if the called method panics (see issue #59).
 func check(config *types.Config, n string, fset *token.FileSet, astFiles []*ast.File, info *types.Info) (p *types.Package, err error) {
 	defer func() {

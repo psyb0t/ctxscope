@@ -64,14 +64,14 @@ func (w lintOptimizeOperandsOrderExpr) Visit(node ast.Node) ast.Visitor {
 	}
 
 	// check if the left sub-expression contains a function call
-	call := astutils.SeekNode[*ast.CallExpr](binExpr.X, isCaller)
-	if call == nil {
+	nodes := astutils.PickNodes(binExpr.X, isCaller)
+	if len(nodes) < 1 {
 		return w
 	}
 
 	// check if the right sub-expression does not contain a function call
-	call = astutils.SeekNode[*ast.CallExpr](binExpr.Y, isCaller)
-	if call != nil {
+	nodes = astutils.PickNodes(binExpr.Y, isCaller)
+	if len(nodes) > 0 {
 		return w
 	}
 
