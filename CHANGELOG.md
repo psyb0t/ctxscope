@@ -2,6 +2,26 @@
 
 All notable changes per release. Versions follow [semver](https://semver.org).
 
+## v1.0.3 — 2026-08-08
+
+Documentation. No code change.
+
+- **Fixed a false claim.** The README listed the exported surface and said "that's
+  all of it", but omitted all four exported types — `Handler`, `Scope`,
+  `Attribute` and `Value`. The list now covers every exported symbol: 11
+  functions and 4 types, matching `go doc` exactly.
+- Every function is documented with its real signature rather than a bare name,
+  so the reader can see what it takes and returns without leaving the page.
+- Added a **Wiring it at the edges** section with the four boundaries that
+  actually matter — HTTP middleware, publishing to a queue, re-seeding on the
+  receiving side, and stamping process facts at startup. The README described
+  crossing a boundary in prose but never showed one.
+- Documented that the global tier is an atomic pointer to an immutable map
+  (lock-free reads, copy-and-swap writes) and that the context tier needs no
+  locking at all, since a `context.Context` is immutable.
+- Added a table of contents, now that the page is past the length where one is
+  needed.
+
 ## v1.0.2 — 2026-08-08
 
 Stops forcing a linter upgrade on everything that imports this module. No

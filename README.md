@@ -11,6 +11,22 @@ Stick attributes on a `context.Context`, get them on every log line under that c
 
 Stdlib plus [`ctxerrors`](https://github.com/psyb0t/ctxerrors). That's the whole dependency list, and it stays that way — see [why](#why-it-imports-nothing).
 
+**Status:** active. Extracted from `common-go` and stable — the API has not changed since, only the package name.
+
+## Contents
+
+- [What the fuck does it do?](#what-the-fuck-does-it-do)
+- [Two tiers, and the difference matters](#two-tiers-and-the-difference-matters)
+- [Getting them onto the line — pick one](#getting-them-onto-the-line--pick-one)
+- [Crossing a process boundary](#crossing-a-process-boundary)
+- [Wiring it at the edges](#wiring-it-at-the-edges)
+- [Why it imports nothing](#why-it-imports-nothing)
+- [The full surface](#the-full-surface)
+- [Design notes](#design-notes)
+- [Was this in common-go?](#was-this-in-common-go)
+- [Dev](#dev)
+- [License](#license)
+
 ## What the fuck does it do?
 
 You set an attribute once, at the boundary:
@@ -87,6 +103,57 @@ Two things worth knowing before they surprise you:
 - `ToJSON` serializes the **context tier only**. The receiving process keeps its own `commit`/`service`. That's the point of the split.
 - JSON has one number type, so an int sent as `42` comes back as `float64(42)`. Fine for log and wire material; a trap only if you type-assert it.
 
+## Wiring it at the edges
+
+Set attributes once where work enters the process. Everything downstream inherits them.
+
+**HTTP server** — stamp the request id, then hand the enriched context onward:
+
+```go
+func RequestID(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := r.Header.Get("X-Request-Id")
+		if id == "" {
+			id = newID()
+		}
+
+		ctx := ctxscope.Set(r.Context(), ctxscope.Attr("request_id", id))
+
+		w.Header().Set("X-Request-Id", id)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+```
+
+**Outbound to a queue** — the map goes on the wire, not the logger:
+
+```go
+data, err := ctxscope.ToJSON(ctx)
+if err != nil {
+	return ctxerrors.Wrap(err, "marshal scope")
+}
+
+msg.Header.Set("x-scope", string(data))
+```
+
+**Receiving side** — re-seed the whole map in one call, and don't drop the message if it's malformed:
+
+```go
+ctx, err := ctxscope.FromJSON(context.Background(), []byte(msg.Header.Get("x-scope")))
+if err != nil {
+	ctx = context.Background() // a bad header is not a reason to lose the work
+}
+```
+
+**Startup** — process facts go in the global tier, so they never travel:
+
+```go
+ctxscope.SetGlobal(
+	ctxscope.Attr("service", "api"),
+	ctxscope.Attr("commit", commitSHA),
+)
+```
+
 ## Why it imports nothing
 
 Transport adapters — the Temporal propagator, the NATS injector, HTTP middleware — live next to their transport and depend on this package. Never the other way around.
@@ -95,11 +162,29 @@ If this package imported the Temporal SDK, every consumer would drag a workflow 
 
 ## The full surface
 
-`Set` / `Remove` / `Get` · `SetGlobal` / `RemoveGlobal` / `GetGlobal` · `GetLogger` · `NewHandler` · `ToJSON` / `FromJSON` · `Attr`
+| function | does |
+|---|---|
+| `Set(ctx, ...Attribute) context.Context` | add attributes to the context tier |
+| `Remove(ctx, ...string) context.Context` | drop keys from it |
+| `Get(ctx) Scope` | read it back, as a copy |
+| `SetGlobal(...Attribute)` | add to the process tier |
+| `RemoveGlobal(...string)` | drop from it |
+| `GetGlobal() Scope` | read it back, as a copy |
+| `GetLogger(ctx) *slog.Logger` | a logger with both tiers applied |
+| `NewHandler(slog.Handler) *Handler` | the handler alternative to `GetLogger` |
+| `ToJSON(ctx) ([]byte, error)` | context tier out to the wire |
+| `FromJSON(ctx, []byte) (context.Context, error)` | and back in on the far side |
+| `Attr[T Value](key, value) Attribute` | build one attribute |
 
-That's all of it. If you're reaching for a helper not on that list, it doesn't exist.
+Four exported types: **`Handler`** (implements `slog.Handler`), **`Scope`** (`map[string]any`), **`Attribute`**, **`Value`** (the type constraint).
 
-`Attr` is generic over strings, bools, ints and floats — anything wider has no sane rendering as either a log attribute or JSON, so it won't compile. `Get` and `GetGlobal` hand back copies, so nothing you do to the result can corrupt the context.
+That is the entire exported API. If you're reaching for a helper not listed above, it doesn't exist.
+
+Three properties worth knowing:
+
+- **`Attr` is generic over strings, bools, ints and floats.** Anything wider has no sane rendering as either a log attribute or JSON, so it won't compile. The constraint sits on `Attr` rather than on `Attribute`'s field because a Go constraint interface can't be used as a field type, and one variadic call can't mix `Attribute[string]` with `Attribute[int]`.
+- **`Get` and `GetGlobal` hand back copies.** Mutating what you get back cannot corrupt the context or the process tier.
+- **Concurrency is handled.** The global tier is an atomic pointer to an immutable map — readers never lock, writers copy-and-swap. The context tier needs no locking at all: a `context.Context` is immutable, so `Set` returns a new one rather than mutating.
 
 ## Design notes
 
