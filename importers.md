@@ -1,15 +1,8 @@
 # Imported by
 
-`github.com/psyb0t/ctxscope` is imported by **10 package(s)**.
+The importer count for `github.com/psyb0t/ctxscope` could not be read from
+[pkg.go.dev](https://pkg.go.dev/github.com/psyb0t/ctxscope?tab=importedby) on this run.
 
-Generated from [pkg.go.dev](https://pkg.go.dev/github.com/psyb0t/ctxscope?tab=importedby). Lists only PUBLIC packages that
-pkg.go.dev has crawled -- private and uncrawled importers are invisible here,
-and the crawl lags publication by days.
-
-**0** of them are outside `psyb0t`.
-
-| repository | packages |
-|---|---:|
-| [psyb0t/essessey](https://github.com/psyb0t/essessey) | 4 |
-| [psyb0t/elelem](https://github.com/psyb0t/elelem) | 3 |
-| [psyb0t/aichteeteapee](https://github.com/psyb0t/aichteeteapee) | 3 |
+This is reported as `unknown` rather than `0` on purpose: a module that
+nothing imports and a page that could not be parsed are different facts,
+and rendering the second as the first would look exactly like data.
